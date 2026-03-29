@@ -95,7 +95,7 @@ The dog's name is kept private. But the architecture he inspired is here for eve
 
 **Dr. Frederico Mascarenhas** — Urologist, Director of AI at the Brazilian Society of Urology (SBU), HealthTech founder.
 
-Built and battle-tested in [OncoNet](https://github.com/fredmmascarenhas-creator/onconet) — an autonomous multi-agent oncology system with 20+ agents running in production.
+Built and battle-tested in a production multi-agent system running 20+ autonomous agents 24/7.
 
 ## License
 
