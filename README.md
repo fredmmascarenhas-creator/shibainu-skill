@@ -41,11 +41,11 @@ ANTHROPIC_API_KEY=sk-ant-...
 const memory = require('./scripts/memory-v2');
 
 await memory.initSoul('my_agent_001', {
-  soul: `# SOUL\nYou are a helpful assistant for João.`,
+  soul: `# SOUL\nYou are a helpful assistant.`,
   initialMemory: `# MEMORY\n## Recent events\n_None yet._`
 });
 
-await memory.appendEvent('my_agent_001', 'User asked about medication schedule.');
+await memory.appendEvent('my_agent_001', 'User asked about their schedule.');
 ```
 
 ### 4. Add the Dream cron
