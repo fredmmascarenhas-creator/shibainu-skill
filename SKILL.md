@@ -38,13 +38,15 @@ context bloat.
 
 ## Quick Start
 
-### 1. Supabase Schema
+### Zero-config (workspace mode)
 
-Run `references/schema.sql` in your Supabase SQL Editor to create the required tables:
-- `agent_memory` — current SOUL + MEMORY per agent (PK: agent_id, memory_type)
-- `agent_memory_history` — versioned history of all consolidations
+No Supabase, no setup. Just install and run.
 
-### 2. Initialize an Agent
+### With Supabase (production mode)
+
+Run `references/schema.sql` in your Supabase SQL Editor, then set `SUPABASE_URL` + `SUPABASE_KEY`.
+
+### Initialize an Agent
 
 ```js
 const memory = require('./scripts/memory-v2.js');
@@ -111,16 +113,40 @@ No direct agent-to-agent function calls. Unidirectional flow prevents infinite l
 
 ---
 
-## Configuration
+## Storage Mode — Auto-Detected
 
-Set these environment variables (or pass directly to scripts):
+ShibaInu detects which backend to use automatically:
 
+| Condition | Mode | Storage |
+|---|---|---|
+| No `SUPABASE_URL` in env | **workspace** | `~/.openclaw/workspace/memory/agents/` |
+| `SUPABASE_URL` set | **supabase** | Supabase REST API (production) |
+
+### Workspace mode (zero config)
 ```bash
+# No configuration needed. Just run:
+node scripts/dream-v2.js
+
+# Files are created automatically at:
+# ~/.openclaw/workspace/memory/agents/<agent_id>/SOUL.md
+# ~/.openclaw/workspace/memory/agents/<agent_id>/MEMORY.md
+# ~/.openclaw/workspace/memory/agents/<agent_id>/history/
+```
+
+### Supabase mode (production / multi-agent)
+```bash
+# 1. Run references/schema.sql in your Supabase SQL Editor
+# 2. Set env vars:
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-service-role-key       # service_role — bypasses RLS
-ANTHROPIC_API_KEY=sk-ant-...             # for Dream consolidation
-DREAM_MODEL=claude-haiku-4-5-20251001    # recommended: haiku for cost efficiency
-DREAM_MAX_AGENTS=50                      # max agents to process per Dream cycle
+SUPABASE_KEY=your-service-role-key       # service_role bypasses RLS
+ANTHROPIC_API_KEY=sk-ant-...             # for Dream LLM consolidation
+DREAM_MODEL=claude-haiku-4-5-20251001    # recommended: haiku for cost
+DREAM_MAX_AGENTS=50                      # agents per Dream cycle
+```
+
+### Override workspace path
+```bash
+SHIBAINU_WORKSPACE_DIR=/custom/path/agents
 ```
 
 ---

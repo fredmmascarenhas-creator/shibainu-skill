@@ -17,6 +17,7 @@
 
 var https  = require('https')
 var memory = require('./memory-v2')
+// memory.mode is 'workspace' or 'supabase' — dream works identically in both
 
 var ANTHROPIC_KEY  = process.env.ANTHROPIC_API_KEY || ''
 var DREAM_MODEL    = process.env.DREAM_MODEL || 'claude-haiku-4-5-20251001'
