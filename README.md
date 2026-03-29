@@ -70,6 +70,27 @@ await memory.appendEvent('my_agent_001', 'User asked about medication schedule.'
 # Download the .skill file and install via OpenClaw
 ```
 
+## Why "Shiba Inu"?
+
+The name comes from a real dog.
+
+Dr. Frederico Mascarenhas — the architect of this system — owns a Shiba Inu. While working on the memory architecture for his autonomous oncology agents, he noticed something: his dog never forgot a route, a face, or a routine. Feed him at 7am once, and he'll be at the bowl at 6:59 every day after that. Walk a path once, and he'll remember every turn a year later.
+
+That's the hippocampus at work. The Shiba Inu breed has a proportionally larger hippocampus than most dogs, giving it exceptional spatial and episodic memory — the ability to store *specific events in specific contexts*, not just patterns.
+
+This skill is built on the same principle:
+
+- **SOUL** = the prefrontal cortex — who the agent *is*, stable and rarely changing
+- **MEMORY** = the hippocampus — what the agent *experienced*, updated constantly  
+- **DREAM** = REM sleep — where the brain consolidates the day's events into long-term memory at 3am
+
+The analogy isn't decorative. It drove real architectural decisions:
+- Memory consolidation happens at night (Dream cron at 03h), not in real-time
+- Only *changed* memories are processed (is_dirty flag = the hippocampus doesn't re-encode what it already knows)
+- Identity (SOUL) and experience (MEMORY) are stored separately, because damaging one shouldn't destroy the other
+
+The dog's name is kept private. But the architecture he inspired is here for everyone.
+
 ## Author
 
 **Dr. Frederico Mascarenhas** — Urologist, Director of AI at the Brazilian Society of Urology (SBU), HealthTech founder.
