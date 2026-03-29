@@ -157,3 +157,19 @@ SHIBAINU_WORKSPACE_DIR=/custom/path/agents
 - `agent_memory` records with `agent_id` starting with `patient_` are clinical data
 - Personal agent records (`personal_*`) should use a **separate Supabase project**
 - See `references/architecture.md` for LGPD/HIPAA compliance guidance
+
+---
+
+## Node.js ESM Compatibility
+
+If your project has `"type": "module"` in `package.json`, use the `.cjs` versions:
+
+```js
+const memory = require('./scripts/memory-v2.cjs');
+```
+
+```bash
+0 3 * * * node /path/to/scripts/dream-v2.cjs >> dream.log 2>&1
+```
+
+Both `.js` and `.cjs` versions are included and functionally identical.
