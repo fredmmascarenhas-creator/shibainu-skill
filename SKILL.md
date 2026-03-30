@@ -2,15 +2,11 @@
 name: shibainu
 description: >
   Hippocampal memory architecture for autonomous AI agents. Implements a three-layer
-  cognitive memory model (SOUL/MEMORY/DREAM) inspired by neuroscience: SOUL as
-  the prefrontal cortex (fixed identity), MEMORY as the hippocampus (dynamic state),
-  and DREAM as REM sleep (semantic consolidation at 03h). Use when: creating agents
-  that need persistent, versioned, multi-agent memory; building oncology or clinical
-  agents with patient-specific memory; implementing delta-based memory consolidation
-  with SHA-256 idempotency; setting up autonomous dream cycles that process only
-  dirty (is_dirty=true) memory records; or sharing this architecture with other
-  OpenClaw deployments. Named in honor of the Shiba Inu breed, whose proportionally
-  large hippocampus gives it exceptional spatial and episodic memory.
+  cognitive memory model (SOUL/MEMORY/DREAM): SOUL for fixed identity, MEMORY for
+  dynamic state, and DREAM for nightly semantic consolidation. Use when building agents
+  that need persistent, versioned memory across sessions; implementing delta-based
+  consolidation with SHA-256 idempotency; or running multi-agent systems with shared
+  memory. Works locally via filesystem (zero config) or with Supabase for production.
 ---
 
 # ShibaInu 🐕 — Hippocampal Memory Skill
@@ -18,7 +14,10 @@ description: >
 > *"The Shiba Inu remembers every path it has ever walked."*
 
 A production-grade, three-layer cognitive memory architecture for autonomous AI agents.
-Built on Supabase + Node.js (zero external dependencies).
+Works out of the box with local filesystem (zero config) or Supabase for production.
+
+> **Zero-config default:** If `SUPABASE_URL` is not set, ShibaInu automatically uses
+> local filesystem at `~/.openclaw/workspace/memory/agents/`. No setup required.
 
 ---
 
@@ -52,22 +51,22 @@ Run `references/schema.sql` in your Supabase SQL Editor, then set `SUPABASE_URL`
 const memory = require('./scripts/memory-v2.js');
 
 // Bootstrap: create SOUL + MEMORY for a new agent
-await memory.initSoul('patient_001', {
-  soul: `You are a patient agent for João Silva. mCRPC diagnosis 2024.
-         Never expose diagnosis to patient. Always compassionate.`,
-  initialMemory: `Patient: João Silva | Last contact: today | Mood: stable`
+await memory.initSoul('assistant_alice', {
+  soul: `You are Alice, a helpful assistant agent.
+         Always respond in a friendly, concise tone.`,
+  initialMemory: `Agent: assistant_alice | Status: active | Last contact: today`
 });
 ```
 
-### 3. Append Events During the Day
+### Append Events During the Day
 
 ```js
 // Call after every meaningful interaction
-await memory.appendEvent('patient_001', 'Reported fever 38.8°C at 14h. Alert sent to doctor.');
-await memory.appendEvent('patient_001', 'Confirmed medication adherence: cabazitaxel day 5.');
+await memory.appendEvent('assistant_alice', 'User asked about project deadlines. Responded with summary.');
+await memory.appendEvent('assistant_alice', 'Reminder set for tomorrow 10h meeting.');
 ```
 
-### 4. Dream Cron (03h daily)
+### Dream Cron (03h daily)
 
 ```bash
 # Add to crontab
@@ -76,6 +75,18 @@ await memory.appendEvent('patient_001', 'Confirmed medication adherence: cabazit
 
 Dream processes only agents with `is_dirty=true`, consolidates with Claude Haiku,
 versions the result in `agent_memory_history`, then marks clean.
+
+### Dream on Demand
+
+Run Dream manually for a specific agent at any time — no need to wait for the 03h cron:
+
+```bash
+# Consolidate a single agent immediately
+node scripts/dream-v2.js --agent assistant_alice
+
+# Or run the full cycle for all dirty agents
+node scripts/dream-v2.js
+```
 
 ---
 
@@ -151,15 +162,6 @@ SHIBAINU_WORKSPACE_DIR=/custom/path/agents
 
 ---
 
-## Privacy Rules
-
-- Never store raw PHI (patient health information) in `content` without encryption
-- `agent_memory` records with `agent_id` starting with `patient_` are clinical data
-- Personal agent records (`personal_*`) should use a **separate Supabase project**
-- See `references/architecture.md` for LGPD/HIPAA compliance guidance
-
----
-
 ## Node.js ESM Compatibility
 
 If your project has `"type": "module"` in `package.json`, use the `.cjs` versions:
@@ -173,3 +175,11 @@ const memory = require('./scripts/memory-v2.cjs');
 ```
 
 Both `.js` and `.cjs` versions are included and functionally identical.
+
+---
+
+## Privacy Rules
+
+- Never store raw PII or sensitive data in `content` without encryption
+- Use separate Supabase projects to isolate different agent populations
+- See `references/architecture.md` for compliance and data isolation guidance
