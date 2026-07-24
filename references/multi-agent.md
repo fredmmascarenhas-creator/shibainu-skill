@@ -109,6 +109,30 @@ async function processInbox(doctorId) {
 
 ---
 
+## OpenClaw Integration
+
+OpenClaw agents read workspace memory files at session start — a different model from
+Claude's built-in memory, and exactly the convention ShibaInu's workspace mode follows
+(`~/.openclaw/workspace/memory/agents/<agent_id>/`). Wiring:
+
+```bash
+# 1. Session-start hook / heartbeat: wake the agent with SOUL + REFLECT + MEMORY
+CONTEXT=$(node /path/to/shibainu/scripts/context.js personal_fred --budget 24000)
+# prepend $CONTEXT to the agent's session prompt
+
+# 2. During the session: the agent appends events (concurrency-safe)
+node -e "require('/path/to/shibainu/scripts/memory-v2.js').appendEvent('personal_fred', process.argv[1])" "user confirmed surgery date"
+
+# 3. Overnight: Dream consolidates MEMORY and curates the REFLECT self-model
+0 3 * * * node /path/to/shibainu/scripts/dream-v2.js
+```
+
+Parallel sub-agents can safely `appendEvent()` to the same agent — workspace mode
+locks per file, Supabase mode uses compare-and-swap on version, and conflicting
+writers retry instead of losing events.
+
+---
+
 ## Naming Conventions
 
 | Agent type | ID pattern | Example |

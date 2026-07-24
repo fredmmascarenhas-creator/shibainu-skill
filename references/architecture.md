@@ -8,14 +8,14 @@ The ShibaInu architecture maps directly to human memory systems:
 |---|---|---|
 | Prefrontal Cortex | SOUL | Identity, values, constraints — stable, rarely changes |
 | Hippocampus | MEMORY | Recent events, state, context — updates constantly |
-| REM Sleep | DREAM | Consolidation, compaction, pattern detection — nightly |
+| Metacognition | REFLECT | Evidence-linked self-model — what the agent learned about itself |
+| REM Sleep | DREAM | Consolidation, compaction, self-model curation — nightly |
 | Long-term Memory | agent_memory_history | Permanent versioned archive |
 
 ### Why Shiba Inu?
-The Shiba Inu breed has a proportionally large hippocampus compared to other dogs, giving
-it exceptional spatial memory and the ability to remember routes, people, and events with
-unusual precision. This skill is named in honor of that trait — and of Dr. Mascarenhas'
-own Shiba Inu, the inspiration for this architecture.
+Origin story, not neuroscience: the skill is named after Dr. Mascarenhas' own Shiba Inu —
+a breed famous for stubbornly remembering every route, person, and grudge — who inspired
+this architecture.
 
 ---
 
@@ -51,19 +51,34 @@ MEMORY contains the agent's dynamic state:
 **appendEvent() is the primary write path.** It loads current MEMORY, appends a
 timestamped event line, and writes back. The SHA-256 guard prevents redundant writes.
 
-### Layer 3: DREAM (REM Sleep)
+### Layer 3: REFLECT (Metacognition)
+```
+memory_type = 'reflect'
+written by:  DREAM only (humans may hand-edit claims)
+lifecycle:   active → revalidated | expired (TTL) | refuted (permanent)
+```
+REFLECT is the agent's self-model: bounded, evidence-linked claims about its own
+behavior — error patterns, heuristics, calibration, preferences. Claims cite verbatim
+quotes from versioned MEMORY, decay unless revalidated, and never resurrect after
+refutation. It is a layer *on top of* memories, never a replacement: distilling
+episodes into opaque behavior and discarding them would be unauditable confabulation.
+Full design: `reflection.md`.
+
+### Layer 4: DREAM (REM Sleep)
 ```
 Runs: 0 3 * * * (03h daily cron)
 Input: WHERE is_dirty = true
-Output: compacted MEMORY + versioned history + markClean()
+Output: compacted MEMORY + curated REFLECT + versioned history + markClean()
 ```
 DREAM is the consolidation engine:
 1. Queries all agents with `is_dirty = true` (delta-only — O(dirty), not O(all))
-2. Loads SOUL + MEMORY for each dirty agent
-3. Calls Claude Haiku to analyze patterns, detect alerts, generate summary
+2. Loads SOUL + MEMORY + active REFLECT claims for each dirty agent
+3. Calls Claude Haiku once: patterns, alerts, summary AND the reflection pass
+   (revalidate / refute / propose evidence-linked claims)
 4. Compacts MEMORY to last 30 events + appends dream summary
-5. Archives current version to `agent_memory_history`
-6. Resets `is_dirty = false` and sets `last_dream_at`
+5. Applies the reflection lifecycle (TTL decay, refutation, caps) and writes REFLECT
+6. Archives current versions to `agent_memory_history`
+7. Resets `is_dirty = false` and sets `last_dream_at`
 
 ---
 
